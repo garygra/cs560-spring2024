@@ -12,6 +12,7 @@ class threejs_group(object):
         self._axis = []
         self._animation = []
         self._size = [canvas_width, canvas_height]
+        self._lines = []
 
     @property
     def axis(self):
@@ -61,12 +62,41 @@ class threejs_group(object):
         var += "</html>"
         return var
 
+    def add_line(self, line, color="0xaaaaaa"):
+        self._lines.append([line, color])
+
+    def html_lines(self):
+        js_string = ""
+        for line in self._lines:
+            points = line[0]
+            r,g,b = self.color_hex_to_rgb(line[1])
+
+            js_string += "{var geometry = new THREE.BufferGeometry();";
+            js_string += "var material = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } );";
+            js_string += "var positions = [];";
+            js_string += "var colors = [];";
+
+            for x,y,z in points:
+                js_string += f"positions.push({x},{y},{z});";
+                js_string += f"colors.push({r},{g},{b});";
+            js_string += "geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );";
+            js_string += "geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );";
+            js_string += "geometry.computeBoundingSphere();";
+            js_string += "mesh = new THREE.Line( geometry, material );";
+            js_string += "scene.add( mesh );}\n";
+        return js_string;
 
     def add_obstacle(self, geom, color="0xff0000"):
         self._obstacles.append([geom, color])
 
     def add_animation(self, box, trajectory):
         self._animation.append([box, trajectory])
+
+    def color_hex_to_rgb(self, color):
+        r = round(int(color[2:4],16) / 255, 2)
+        g = round(int(color[4:6],16) / 255, 2)
+        b = round(int(color[6:8],16) / 255, 2)
+        return r,g,b
 
     def html_animation(self):
         js_string = ""
@@ -79,9 +109,7 @@ class threejs_group(object):
                 time_stamps += f"{t},"
                 positions += f"{pos[0]},{pos[1]},{pos[2]},"
                 quaternions += f"{quat[1]},{quat[2]},{quat[3]},{quat[0]},"
-                r = round(int(color[2:4],16) / 255, 2)
-                g = round(int(color[4:6],16) / 255, 2)
-                b = round(int(color[6:8],16) / 255, 2)
+                r,g,b = self.color_hex_to_rgb(color)
                 colors += f"{r},{g},{b},"
             time_stamps = time_stamps[:-1]
             positions = positions[:-1]
@@ -89,8 +117,8 @@ class threejs_group(object):
             colors = colors[:-1]
             js_string += "{";
             js_string += geom.to_threejs("0xff0000");
-            js_string += f"var positionKF = new THREE.VectorKeyframeTrack( '.position',[{time_stamps}],[{positions}]);";
-            js_string += f"var quaternionKF = new THREE.QuaternionKeyframeTrack( '.quaternion',[{time_stamps}],[{quaternions}]);";
+            js_string += f"var positionKF = new THREE.VectorKeyframeTrack( '.position',[{time_stamps}],[{positions}],THREE.InterpolateDiscrete);";
+            js_string += f"var quaternionKF = new THREE.QuaternionKeyframeTrack( '.quaternion',[{time_stamps}],[{quaternions}],THREE.InterpolateDiscrete);";
             js_string += f"var colorsKF = new THREE.ColorKeyframeTrack( '.material.color',[{time_stamps}],[{colors}],THREE.InterpolateDiscrete);";
             js_string += "var clip = new THREE.AnimationClip( 'Action', -1, [positionKF,quaternionKF,colorsKF] );";
             js_string += f"var mixer = new THREE.AnimationMixer( mesh_{geom.name} );";
@@ -142,6 +170,7 @@ class threejs_group(object):
         file.write(self.html_axis())
         file.write(self.html_obstacles())
         file.write(self.html_animation())
+        file.write(self.html_lines())
         file.write(self.html_footer())
 
         file.close();
