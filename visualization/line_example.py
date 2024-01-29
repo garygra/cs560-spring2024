@@ -1,4 +1,5 @@
 import math
+from geometry import * 
 from threejs_group import *
 
 if __name__ == "__main__":
@@ -14,14 +15,10 @@ if __name__ == "__main__":
   line_1 = []
   line_2 = []
 
-  for t in np.arange(0, 10, 0.1, dtype=float):
+  for t in np.arange(0,10,0.1,dtype=float):
     line_0.append([t,t,t])
-    line_1.append([t*t,t,t])
-    line_2.append([math.cos(t),math.sin(t),t])
-
+    line_1.append([math.cos(t),math.sin(t),t])
   viz_out.add_line(line_0, red)
   viz_out.add_line(line_1, purple)
-  viz_out.add_line(line_2, blue)
-
 
   viz_out.to_html("out/lines.html");

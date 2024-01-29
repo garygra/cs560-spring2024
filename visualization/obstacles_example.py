@@ -1,14 +1,17 @@
+from geometry import * 
 from threejs_group import *
 
 if __name__ == "__main__":
 
-	red="0xff0000"
-	green="0x00ff00"
-	viz_out = threejs_group(js_dir="../js")
+  red="0xff0000"
+  green="0x00ff00"
+  viz_out = threejs_group(js_dir="../js")
 
-	b0 = sphere("obstacle_0", 3, [10,10,3], [0.707, 0, 0, 0.707])
-	b1 = sphere("obstacle_1", 1, [10,0,1], [0.707, 0, 0, 0.707])
-	viz_out.add_obstacle(b0, "0xff0000")
-	viz_out.add_obstacle(b1, "0xff00ff")
+  geom = sphere("sphere_0", 1, [2,3,4], [1,0,0,0])
+  geom1 = sphere("sphere_1", 1, [-2,3,4], [1,0,0,0])
+  box0 = box("box0", 1,1,1, [2,-3,4], [0.707,0.707,0,0])
+  viz_out.add_obstacle(geom, green)
+  viz_out.add_obstacle(geom1, red)
+  viz_out.add_obstacle(box0, red)
 
-	viz_out.to_html("out/obstacles.html");
+  viz_out.to_html("out/obstacles.html");

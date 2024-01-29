@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from geometry import * 
+# from geometry import * 
 
 class threejs_group(object):
     def __init__(self, canvas_width = 600, canvas_height = 600, js_dir="./js/"):

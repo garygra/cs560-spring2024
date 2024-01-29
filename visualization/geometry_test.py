@@ -1,5 +1,5 @@
-from geometry import * 
 import pytest
+from .geometry import * 
 
 
 def test_geometry_default():
